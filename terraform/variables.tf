@@ -56,3 +56,15 @@ variable "monitoring_namespace" {
   type        = string
   default     = "monitoring"
 }
+
+variable "domain_name" {
+  description = "Domain name for monitoring UIs (Grafana, Prometheus, etc.)"
+  type        = string
+  default     = "monitoring.example.com"
+}
+
+variable "letsencrypt_email" {
+  description = "Email address for Let's Encrypt certificates"
+  type        = string
+  default     = "admin@example.com"
+}

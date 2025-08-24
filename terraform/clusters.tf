@@ -56,8 +56,9 @@ resource "google_container_cluster" "cluster1" {
     enabled = true
   }
 
-  logging_service    = "logging.googleapis.com/kubernetes"
-  monitoring_service = "monitoring.googleapis.com/kubernetes"
+  # Disable built-in logging and monitoring to simulate app teams not enabling proper observability
+  logging_service    = "none" # before logging.googleapis.com/kubernetes
+  monitoring_service = "none" # before monitoring.googleapis.com/kubernetes
 
   ip_allocation_policy {
     cluster_secondary_range_name  = "pod-ranges-large"  # Use the large range that already works
@@ -141,8 +142,9 @@ resource "google_container_cluster" "cluster2" {
     enabled = true
   }
 
-  logging_service    = "logging.googleapis.com/kubernetes"
-  monitoring_service = "monitoring.googleapis.com/kubernetes"
+  # Disable built-in logging and monitoring to simulate app teams not enabling proper observability
+  logging_service    = "none"
+  monitoring_service = "none"
 
   ip_allocation_policy {
     cluster_secondary_range_name  = "pod-ranges-large"  # Use the large range that already works
