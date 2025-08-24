@@ -292,3 +292,151 @@ terraform destroy
 - ✅ **Pre-configured Dashboards**: Kubernetes monitoring out of the box
 - ✅ **Automatic Scaling**: HPA and cluster autoscaling enabled
 - ✅ **Health Checks**: Blackbox monitoring for external endpoints
+
+## 🧪 Testing Your Deployment
+
+### Automated Testing Script
+
+This repository includes a comprehensive testing script (`test-nginx-apps.sh`) that validates your GKE cluster deployments and nginx applications. The script performs multiple types of tests to ensure your infrastructure is working correctly.
+
+### Running the Tests
+
+```bash
+# Make the script executable and run it
+chmod +x test-nginx-apps.sh
+./test-nginx-apps.sh
+```
+
+### What the Tests Cover
+
+The testing script performs 5 comprehensive test suites:
+
+1. **Basic Connectivity Test**: Verifies HTTP response codes and response times
+2. **Content Verification**: Confirms proper HTML content is being served
+3. **Load Testing**: Tests with 10 concurrent requests to verify performance
+4. **Kubernetes Resource Status**: Checks pod health, services, and LoadBalancer IPs
+5. **Pod Health Check**: Validates individual pod responses
+
+### Example Test Output
+
+When you run the test script, you should see output similar to this:
+
+```
+=== Testing nginx applications in GKE clusters ===
+
+Cluster 1 IP: 34.121.230.139
+Cluster 2 IP: 34.44.230.72
+
+=== Test 1: Basic Connectivity ===
+Testing Cluster 1...
+Status: 200, Time: 0.130536s, Size: 615 bytes
+Testing Cluster 2...
+Status: 200, Time: 0.268854s, Size: 615 bytes
+
+=== Test 2: Content Verification ===
+Cluster 1 response (first 3 lines):
+<!DOCTYPE html>
+<html>
+<head>
+
+Cluster 2 response (first 3 lines):
+<!DOCTYPE html>
+<html>
+<head>
+
+=== Test 3: Load Testing (10 requests each) ===
+Testing Cluster 1 load handling...
+Request 1: 0.194449s
+Request 2: 0.108168s
+Request 3: 0.119420s
+Request 4: 0.233658s
+Request 5: 0.106518s
+Request 6: 0.135449s
+Request 7: 0.119187s
+Request 8: 0.183182s
+Request 9: 0.105651s
+Request 10: 0.194052s
+
+Testing Cluster 2 load handling...
+Request 1: 0.153047s
+Request 2: 0.106215s
+Request 3: 0.107971s
+Request 4: 0.106692s
+Request 5: 0.180819s
+Request 6: 0.105511s
+Request 7: 0.148358s
+Request 8: 0.181506s
+Request 9: 0.145330s
+Request 10: 0.118951s
+
+=== Test 4: Kubernetes Resource Status ===
+Cluster 1 pods:
+NAME                         READY   STATUS    RESTARTS   AGE
+nginx-app-54c6c77df5-8nwwl   1/1     Running   0          48m
+nginx-app-54c6c77df5-m9jv6   1/1     Running   0          48m
+
+Cluster 2 pods:
+NAME                         READY   STATUS    RESTARTS   AGE
+nginx-app-54c6c77df5-84qwb   1/1     Running   0          48m
+nginx-app-54c6c77df5-sgbw4   1/1     Running   0          48m
+
+Cluster 1 service:
+NAME            TYPE           CLUSTER-IP     EXTERNAL-IP      PORT(S)        AGE
+nginx-service   LoadBalancer   192.168.1.59   34.121.230.139   80:30110/TCP   45m
+
+Cluster 2 service:
+NAME            TYPE           CLUSTER-IP      EXTERNAL-IP    PORT(S)        AGE
+nginx-service   LoadBalancer   192.168.1.168   34.44.230.72   80:32034/TCP   46m
+
+=== Test 5: Pod Health Check ===
+Testing individual pods in Cluster 1:
+<!DOCTYPE html>
+
+Testing individual pods in Cluster 2:
+<!DOCTYPE html>
+
+=== All tests completed! ===
+```
+
+### Understanding Test Results
+
+**✅ Successful Test Indicators:**
+- HTTP Status: `200` (OK responses)
+- Response Times: Under 0.3 seconds (good performance)
+- Pod Status: `Running` with `READY 1/1`
+- Services: External IPs assigned to LoadBalancers
+- Content: Valid HTML with `<!DOCTYPE html>` declarations
+- Restarts: `0` (stable pods with no crashes)
+
+**🔍 What Each Test Validates:**
+- **Test 1**: Confirms both clusters are accessible from the internet
+- **Test 2**: Verifies nginx is serving proper web content
+- **Test 3**: Ensures clusters can handle concurrent load
+- **Test 4**: Validates Kubernetes resources are healthy
+- **Test 5**: Confirms individual pod health and connectivity
+
+### Manual Testing Commands
+
+You can also test individual components manually:
+
+```bash
+# Get cluster external IPs
+kubectl get services -n applications --context=gke_project-2-469918_us-central1-a_app-cluster-1
+kubectl get services -n applications --context=gke_project-2-469918_us-central1-a_app-cluster-2
+
+# Test direct connectivity
+curl -I http://YOUR_CLUSTER1_IP
+curl -I http://YOUR_CLUSTER2_IP
+
+# Check pod status
+kubectl get pods -n applications --context=gke_project-2-469918_us-central1-a_app-cluster-1
+kubectl get pods -n applications --context=gke_project-2-469918_us-central1-a_app-cluster-2
+```
+
+### Troubleshooting Failed Tests
+
+If tests fail, check:
+1. **LoadBalancer Services**: Ensure external IPs are assigned (may take 2-3 minutes)
+2. **Pod Status**: Verify pods are in `Running` state
+3. **Network Connectivity**: Check VPC firewall rules
+4. **Application Deployment**: Confirm nginx applications are properly deployed
